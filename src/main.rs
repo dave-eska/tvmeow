@@ -10,12 +10,13 @@ fn main(){
         .add_systems(Update, player_movement)
         .run();
 }
-
 #[allow(unused)]
 #[derive(Component)]
-pub struct Player{
+pub struct Entity{
     speed: f32,
-    sprite_scale: Vec3
+    sprite_scale: Vec3,
+    direction: Vec2,
+    is_player: bool
 }
 
 pub fn setup(
@@ -26,11 +27,24 @@ pub fn setup(
     let window = _window_query.get_single().unwrap();
 
     cmd.spawn((
-        Player{
+        Entity{
             speed: 500.0,
-            sprite_scale: Vec3::splat(2.5)
+            sprite_scale: Vec3::splat(2.5),
+            direction: Vec2::ZERO,
+            is_player: true
         },
         Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
+        Sprite::from(_asset_server.load(Path::new("img/player.png")))
+    ));
+
+    cmd.spawn((
+        Entity{
+            speed: 500.0,
+            sprite_scale: Vec3::splat(2.5),
+            direction: Vec2::ZERO,
+            is_player: false
+        },
+        Transform::from_xyz(window.width()/2.0+300.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
         Sprite::from(_asset_server.load(Path::new("img/player.png")))
     ));
 
@@ -44,20 +58,34 @@ pub fn setup(
 #[allow(unused)]
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<(&mut Transform, &Player), With<Player>>,
+    mut player_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
     time: Res<Time>
 ){
-    if let Ok(mut transf_and_player) = player_query.get_single_mut() {
-        let input_x = keyboard_input.pressed(KeyCode::KeyD) as i32 - keyboard_input.pressed(KeyCode::KeyA) as i32;
-        let input_y = keyboard_input.pressed(KeyCode::KeyW) as i32 - keyboard_input.pressed(KeyCode::KeyS) as i32;
+    for mut player in player_query.iter_mut() {
+        if player.1.is_player {
+            let input_x = keyboard_input.pressed(KeyCode::KeyD) as i32 - keyboard_input.pressed(KeyCode::KeyA) as i32;
+            let input_y = keyboard_input.pressed(KeyCode::KeyW) as i32 - keyboard_input.pressed(KeyCode::KeyS) as i32;
 
-        let mut direction = Vec3::ZERO;
-        direction += Vec3::new(input_x as f32, input_y as f32, 0.0);
+            let mut direction = Vec3::ZERO;
+            direction += Vec3::new(input_x as f32, input_y as f32, 0.0);
 
-        if direction.length() > 0.0 {
-            direction = direction.normalize();
+            if direction.length() > 0.0 {
+                direction = direction.normalize();
+            }
+
+            player.0.translation += direction * player.1.speed * time.delta_secs();
         }
+    }
+}
 
-        transf_and_player.0.translation += direction * transf_and_player.1.speed * time.delta_secs();
+#[allow(unused)]
+pub fn keep_entity_in_window(
+    mut transform_query: Query<&mut Transform>,
+    _window_query: Query<&Window, With<PrimaryWindow>>,
+){
+    let window = _window_query.get_single().unwrap();
+
+    for entity_pos in transform_query.iter() {
+
     }
 }
