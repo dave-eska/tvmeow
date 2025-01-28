@@ -8,6 +8,7 @@ fn main(){
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
         .add_systems(Update, player_movement)
+        .add_systems(Update, keep_entity_in_window)
         .run();
 }
 #[allow(unused)]
@@ -58,10 +59,10 @@ pub fn setup(
 #[allow(unused)]
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
-    mut player_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
+    mut entity_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
     time: Res<Time>
 ){
-    for mut player in player_query.iter_mut() {
+    for mut player in entity_query.iter_mut() {
         if player.1.is_player {
             let input_x = keyboard_input.pressed(KeyCode::KeyD) as i32 - keyboard_input.pressed(KeyCode::KeyA) as i32;
             let input_y = keyboard_input.pressed(KeyCode::KeyW) as i32 - keyboard_input.pressed(KeyCode::KeyS) as i32;
@@ -78,14 +79,41 @@ pub fn player_movement(
     }
 }
 
+pub fn get_max_x(window_width: f32, entity_width: f32) -> f32 { window_width-entity_width }
+pub fn get_max_y(window_height: f32, entity_height: f32) -> f32 { window_height-entity_height }
+
 #[allow(unused)]
 pub fn keep_entity_in_window(
-    mut transform_query: Query<&mut Transform>,
+    mut entity_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
     _window_query: Query<&Window, With<PrimaryWindow>>,
 ){
     let window = _window_query.get_single().unwrap();
 
-    for entity_pos in transform_query.iter() {
+    for mut entity in entity_query.iter_mut() {
+        let mut translation = entity.0.translation;
 
+        if translation.x > get_max_x(window.width(), 32.0*entity.1.sprite_scale.x) {
+            translation.x = get_max_x(window.width(), 32.0*entity.1.sprite_scale.x);
+        }else if translation.x < 32.0*entity.1.sprite_scale.x {
+            translation.x = 32.0*entity.1.sprite_scale.x;
+        }
+
+        if translation.y > get_max_y(window.height(), 32.0*entity.1.sprite_scale.x) {
+            translation.y = get_max_y(window.height(), 32.0*entity.1.sprite_scale.x);
+        }else if translation.y < 32.0*entity.1.sprite_scale.y {
+            translation.y = 32.0*entity.1.sprite_scale.y;
+        }
+
+        entity.0.translation = translation;
     }
 }
+
+/*
+for mut entity in entity_query.iter_mut() {
+let mut entity_translation = entity.0.translation;
+entity_translation.x.clamp(0.0, get_max_x(window.width(), 32.0*entity.1.sprite_scale.x));
+entity_translation.y.clamp(0.0, get_max_x(window.height(), 32.0*entity.1.sprite_scale.y));
+
+entity.0.translation = entity_translation;
+}
+*/
