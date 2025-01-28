@@ -1,7 +1,8 @@
+#NOTE TO SELF: USE _ NOT CAPITAL
 [package]
 name = "tvmeow"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.15.1"
+bevy = { version = "0.15.1", features = ["wayland"] }
