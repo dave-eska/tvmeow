@@ -88,6 +88,8 @@ pub fn player_movement(
             }
 
             player.0.translation += player.1.direction * player.1.speed * time.delta_secs();
+
+            player.1.direction = Vec3::ZERO;
         }
     }
 }
