@@ -1,7 +1,11 @@
 use std::path::Path;
 
+use rand::Rng;
+
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+
+const MAX_ENEMIES: i32 = 6;
 
 fn main(){
     App::new()
@@ -11,6 +15,7 @@ fn main(){
         .add_systems(Update, keep_entity_in_window)
         .run();
 }
+
 #[allow(unused)]
 #[derive(Component)]
 pub struct Entity{
@@ -28,6 +33,12 @@ pub fn setup(
     let window = _window_query.get_single().unwrap();
 
     cmd.spawn((
+        Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0),
+        Camera2d{}
+    )
+    );
+
+    cmd.spawn((
         Entity{
             speed: 500.0,
             sprite_scale: Vec3::splat(2.5),
@@ -38,25 +49,28 @@ pub fn setup(
         Sprite::from(_asset_server.load(Path::new("img/player.png")))
     ));
 
-    cmd.spawn((
-        Entity{
-            speed: 500.0,
-            sprite_scale: Vec3::splat(2.5),
-            direction: Vec3::ZERO,
-            is_player: false
-        },
-        Transform::from_xyz(window.width()/2.0+300.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
-        Sprite::from(_asset_server.load(Path::new("img/player.png")))
-    ));
+    let  mut rng = rand::thread_rng();
 
-    cmd.spawn((
-        Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0),
-        Camera2d{}
-    )
-    );
+    let max_x = get_max_x(window.width(), 32.0*2.5);
+    let max_y = get_max_y(window.height(), 32.0*2.5);
+    for _i in 1..MAX_ENEMIES {
+        cmd.spawn((
+            Entity{
+                speed: 500.0,
+                sprite_scale: Vec3::splat(2.5),
+                direction: Vec3::ZERO,
+                is_player: false
+            },
+            Transform::from_xyz(
+                rng.gen_range(0..max_x as i32) as f32,
+                rng.gen_range(0..max_y as i32) as f32,
+                0.0).with_scale(Vec3::splat(5.0)),
+            Sprite::from(_asset_server.load(Path::new("img/player.png")))
+        ));
+    }
+
 }
 
-#[allow(unused)]
 pub fn player_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut entity_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
@@ -81,7 +95,6 @@ pub fn player_movement(
 pub fn get_max_x(window_width: f32, entity_width: f32) -> f32 { window_width-entity_width }
 pub fn get_max_y(window_height: f32, entity_height: f32) -> f32 { window_height-entity_height }
 
-#[allow(unused)]
 pub fn keep_entity_in_window(
     mut entity_query: Query<(&mut Transform, &mut Entity), With<Entity>>,
     _window_query: Query<&Window, With<PrimaryWindow>>,
