@@ -16,7 +16,7 @@ fn main(){
 pub struct Entity{
     speed: f32,
     sprite_scale: Vec3,
-    direction: Vec2,
+    direction: Vec3,
     is_player: bool
 }
 
@@ -31,7 +31,7 @@ pub fn setup(
         Entity{
             speed: 500.0,
             sprite_scale: Vec3::splat(2.5),
-            direction: Vec2::ZERO,
+            direction: Vec3::ZERO,
             is_player: true
         },
         Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
@@ -42,7 +42,7 @@ pub fn setup(
         Entity{
             speed: 500.0,
             sprite_scale: Vec3::splat(2.5),
-            direction: Vec2::ZERO,
+            direction: Vec3::ZERO,
             is_player: false
         },
         Transform::from_xyz(window.width()/2.0+300.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
@@ -67,14 +67,13 @@ pub fn player_movement(
             let input_x = keyboard_input.pressed(KeyCode::KeyD) as i32 - keyboard_input.pressed(KeyCode::KeyA) as i32;
             let input_y = keyboard_input.pressed(KeyCode::KeyW) as i32 - keyboard_input.pressed(KeyCode::KeyS) as i32;
 
-            let mut direction = Vec3::ZERO;
-            direction += Vec3::new(input_x as f32, input_y as f32, 0.0);
+            player.1.direction += Vec3::new(input_x as f32, input_y as f32, 0.0);
 
-            if direction.length() > 0.0 {
-                direction = direction.normalize();
+            if player.1.direction.length() > 0.0 {
+                player.1.direction = player.1.direction.normalize();
             }
 
-            player.0.translation += direction * player.1.speed * time.delta_secs();
+            player.0.translation += player.1.direction * player.1.speed * time.delta_secs();
         }
     }
 }
@@ -107,13 +106,3 @@ pub fn keep_entity_in_window(
         entity.0.translation = translation;
     }
 }
-
-/*
-for mut entity in entity_query.iter_mut() {
-let mut entity_translation = entity.0.translation;
-entity_translation.x.clamp(0.0, get_max_x(window.width(), 32.0*entity.1.sprite_scale.x));
-entity_translation.y.clamp(0.0, get_max_x(window.height(), 32.0*entity.1.sprite_scale.y));
-
-entity.0.translation = entity_translation;
-}
-*/
