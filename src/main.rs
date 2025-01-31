@@ -14,7 +14,7 @@ fn main(){
         .add_systems(Startup, setup)
         .add_systems(Update, entity::player_movement)
         .add_systems(Update, entity::enemy_movement)
-        .add_systems(Update, entity::keep_entity_in_window)
+        .add_systems(Update, entity::keep_entities_in_window)
         .run();
 }
 
@@ -33,26 +33,25 @@ pub fn setup(
     );
 
     cmd.spawn((
-        entity::Player{
-            speed: 500.0,
-            sprite_scale: Vec3::splat(2.5),
-            direction: Vec3::ZERO,
-        },
+        entity::Speed(300.0),
+        entity::SpriteScale(Vec3::splat(2.5)),
+        entity::Direction(Vec3::ZERO),
+        entity::Player,
+        entity::KeepInWindow,
         Transform::from_xyz(window.width()/2.0, window.height()/2.0, 0.0).with_scale(Vec3::splat(5.0)),
         Sprite::from(_asset_server.load(Path::new("img/player.png")))
     ));
 
-    let  mut rng = rand::thread_rng();
+    let mut rng = rand::thread_rng();
 
     let max_x = entity::get_max_x(window.width(), 32.0*2.5);
     let max_y = entity::get_max_y(window.height(), 32.0*2.5);
     for _i in 1..MAX_ENEMIES {
         cmd.spawn((
-           entity::Enemy{
-                speed: 500.0,
-                sprite_scale: Vec3::splat(2.5),
-                direction: Vec3::ZERO,
-            },
+            entity::Speed(1.0),
+            entity::SpriteScale(Vec3::splat(2.5)),
+            entity::Direction(Vec3::ZERO),
+            entity::Enemy,
             Transform::from_xyz(
                 rng.gen_range(0..max_x as i32) as f32,
                 rng.gen_range(0..max_y as i32) as f32,

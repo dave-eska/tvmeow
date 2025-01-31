@@ -36,7 +36,7 @@ pub fn player_movement(
     }
 
     transform.translation += direction.0 * speed.0 * time.delta_secs();
-    println!("X: {0}, Y: {1}", transform.translation.x, transform.translation.y);
+    println!("{}", direction.0 * speed.0 * time.delta_secs());
 
     direction.0 = Vec3::ZERO;
 }

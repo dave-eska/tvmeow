@@ -6,4 +6,4 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
-bevy = { version = "0.15.1", features = ["wayland"] }
+bevy = { version = "0.15.1", features = ["wayland", "dynamic_linking"] }
