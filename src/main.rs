@@ -6,7 +6,7 @@ use bevy::window::PrimaryWindow;
 
 mod entity;
 
-const MAX_ENEMIES: i32 = 6;
+const MAX_ENEMIES: i32 = 2;
 
 fn main(){
     App::new()
@@ -48,10 +48,11 @@ pub fn setup(
     let max_y = entity::get_max_y(window.height(), 32.0*2.5);
     for _i in 1..MAX_ENEMIES {
         cmd.spawn((
-            entity::Speed(1.0),
+            entity::Speed(100.0),
             entity::SpriteScale(Vec3::splat(2.5)),
             entity::Direction(Vec3::ZERO),
             entity::Enemy,
+            entity::KeepInWindow,
             Transform::from_xyz(
                 rng.gen_range(0..max_x as i32) as f32,
                 rng.gen_range(0..max_y as i32) as f32,

@@ -36,7 +36,6 @@ pub fn player_movement(
     }
 
     transform.translation += direction.0 * speed.0 * time.delta_secs();
-    println!("X: {0}, Y: {1}", transform.translation.x, transform.translation.y);
 
     direction.0 = Vec3::ZERO;
 }
@@ -70,5 +69,17 @@ pub fn keep_entities_in_window(
 }
 
 pub fn enemy_movement(
+    mut entity_query: Query<(&mut Transform, &mut Direction, &Speed), With<Enemy>>,
+    player: Single<&Transform, (With<Player>, Without<Enemy>)>,
+    time: Res<Time>
 ){
+    let plr_transform = player.into_inner();
+
+    for (mut transform, mut direction, speed) in entity_query.iter_mut() {
+        let input_x = if plr_transform.translation.x > transform.translation.x {1 as f32} else {-1 as f32};
+        let input_y = if plr_transform.translation.y < transform.translation.y {1 as f32} else {-1 as f32};
+
+        direction.0 += Vec3::new(input_x, input_y, 0.0);
+        transform.translation += direction.0 * speed.0 * time.delta_secs();
+    }
 }
