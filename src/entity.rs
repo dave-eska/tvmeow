@@ -77,9 +77,12 @@ pub fn enemy_movement(
 
     for (mut transform, mut direction, speed) in entity_query.iter_mut() {
         let input_x = if plr_transform.translation.x > transform.translation.x {1 as f32} else {-1 as f32};
-        let input_y = if plr_transform.translation.y < transform.translation.y {1 as f32} else {-1 as f32};
+        let input_y = if plr_transform.translation.y < transform.translation.y {-1 as f32} else {1 as f32};
+
+        //println!("input_x: {0}\ninput_y: {1}", input_x, input_y);
 
         direction.0 += Vec3::new(input_x, input_y, 0.0);
         transform.translation += direction.0 * speed.0 * time.delta_secs();
+        direction.0 = Vec3::ZERO;
     }
 }

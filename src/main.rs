@@ -6,7 +6,7 @@ use bevy::window::PrimaryWindow;
 
 mod entity;
 
-const MAX_ENEMIES: i32 = 2;
+const MAX_ENEMIES: i32 = 4;
 
 fn main(){
     App::new()
@@ -46,7 +46,7 @@ pub fn setup(
 
     let max_x = entity::get_max_x(window.width(), 32.0*2.5);
     let max_y = entity::get_max_y(window.height(), 32.0*2.5);
-    for _i in 1..MAX_ENEMIES {
+    for _i in 1..(MAX_ENEMIES-1) {
         cmd.spawn((
             entity::Speed(100.0),
             entity::SpriteScale(Vec3::splat(2.5)),
